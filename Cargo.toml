@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "Mainframe records, messy CSVs and document text turned into clean, reconciled data."
-repository = "https://github.com/braylo-ai/fde-03-legacy-etl"
+repository = "https://github.com/braylo777/fde-03-legacy-etl"
 
 [lib]
 crate-type = ["rlib", "cdylib"]
