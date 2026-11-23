@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legacy Data Extraction &amp; ETL · FDE Stage 3</title>
+<meta name="description" content="Turn mainframe records, messy CSV exports and document text into clean, typed, reconciled data, and flag every value it could not trust.">
+<style>
+:root { --bg:#fafaf7; --fg:#1b1b18; --mut:#6b6a63; --card:#fff; --line:#e4e2da; --acc:#2a5bd7; --ok:#1d7a46; --err:#b3261e; --code:#f3f2ee; }
+@media (prefers-color-scheme: dark) { :root { --bg:#141413; --fg:#ecebe6; --mut:#a09f98; --card:#1c1c1a; --line:#302f2b; --acc:#7ea2ff; --ok:#5fc58c; --err:#ff8a80; --code:#232320; } }
+* { box-sizing:border-box }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif }
+main { max-width:960px; margin:0 auto; padding:48px 20px 64px }
+.kicker { font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--acc) }
+h1 { font-size:clamp(28px,4vw,40px); line-height:1.15; margin:10px 0 8px; letter-spacing:-.01em }
+.lede { color:var(--mut); max-width:68ch; margin:0 0 28px }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px }
+[role=tablist] { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px }
+[role=tablist] button { font:inherit; font-size:14px; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--fg); cursor:pointer }
+[role=tablist] button[aria-selected=true] { background:var(--acc); border-color:var(--acc); color:#fff }
+#help { color:var(--mut); font-size:14px; margin:0 0 12px }
+.io { display:grid; grid-template-columns:1fr 1fr; gap:14px }
+@media (max-width:760px) { .io { grid-template-columns:1fr } }
+label { font-size:12px; font-weight:600; color:var(--mut); text-transform:uppercase; letter-spacing:.06em }
+textarea, pre { width:100%; min-height:340px; margin:6px 0 0; padding:12px; border-radius:8px; border:1px solid var(--line); background:var(--code); color:var(--fg); font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; overflow:auto; white-space:pre-wrap; word-break:break-word }
+textarea { resize:vertical }
+pre.ok { border-color:var(--ok) } pre.err { border-color:var(--err); color:var(--err) }
+.bar { display:flex; gap:8px; margin-top:12px }
+.bar button { font:inherit; font-weight:600; padding:8px 18px; border-radius:8px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer }
+.bar button.sec { background:transparent; color:var(--acc) }
+.bar button:disabled { opacity:.5; cursor:wait }
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px }
+@media (max-width:760px) { .cols { grid-template-columns:1fr } }
+h2 { font-size:15px; margin:0 0 8px } ul { margin:0; padding-left:18px; font-size:14px } li { margin:3px 0 }
+footer { margin-top:28px; font-size:13px; color:var(--mut) } a { color:var(--acc) }
+</style>
+</head>
+<body>
+<main>
+<div class="kicker">Forward Deployed Engineering · Stage 3 of 12</div>
+<h1>Legacy Data Extraction &amp; ETL</h1>
+<p class="lede">Turn mainframe records, messy CSV exports and document text into clean, typed, reconciled data, and flag every value it could not trust. The logic below runs in your browser: it is the same Rust code as the repo, compiled to WebAssembly. Nothing is sent to a server.</p>
+<section class="card">
+<div id="tabs" role="tablist" aria-label="Operations"></div>
+<p id="help"></p>
+<div class="io">
+<div><label for="input">Input (JSON, editable)</label><textarea id="input" spellcheck="false"></textarea></div>
+<div><label for="output">Output</label><pre id="output" aria-live="polite">Loading…</pre></div>
+</div>
+<div class="bar"><button id="run" type="button" disabled>Run</button><button id="reset" class="sec" type="button">Reset example</button></div>
+</section>
+<div class="cols">
+<section class="card"><h2>What this repo covers</h2><ul><li>COBOL copybook parser: PIC X / 9 / S9 V9, COMP-3 packed decimal, COMP binary, zoned sign overpunch, OCCURS, FILLER, sequence columns</li><li>EBCDIC (code page 037) to Unicode, full 256-byte table</li><li>CSV cleanup: delimiter sniffing, RFC 4180 quotes, BOM, header names, US/EU dates, US/EU/accounting money, null markers, duplicate rows, per-row issue list</li><li>Reconciliation in integer cents: matches, amount breaks with tolerance, orphans both sides, duplicate keys, control totals</li><li>Labelled field extraction from OCR / PDF text with source line for each value and a missing-required list</li></ul></section>
+<section class="card"><h2>Not covered (honest gaps)</h2><ul><li>No OCR engine or PDF parser here: feed it text from Tesseract, AWS Textract or pdftotext</li><li>No live mainframe connector (DB2 / IMS / VSAM over the network); it decodes the exported files</li><li>No Airflow or dbt project: each op is a pure step you can call from an Airflow task or a dbt Python model</li><li>Other EBCDIC code pages (e.g. 500, 1047) and COMP-1/COMP-2 floats</li></ul></section>
+</div>
+<footer>Source, tests and CLI: <a href="https://github.com/braylo-ai/fde-03-legacy-etl">github.com/braylo-ai/fde-03-legacy-etl</a> · MIT license · Built by <a href="https://braylo.si">Braylo SI</a></footer>
+</main>
+<script type="application/json" id="cfg">{"stage": 3, "repo": "fde-03-legacy-etl", "title": "Legacy Data Extraction & ETL", "tagline": "Turn mainframe records, messy CSV exports and document text into clean, typed, reconciled data, and flag every value it could not trust.", "why": "Most enterprise AI projects stall on data, not models. The customer's truth lives in a COBOL system that exports EBCDIC files, in CSVs from five ERPs with five date formats, and in scanned PDFs. Before an agent can answer a question about an invoice, someone has to extract, normalize and reconcile that data, and prove the totals still match. This repo does those steps with exact decimal handling and an issue list instead of silent guesses.", "covers": ["COBOL copybook parser: PIC X / 9 / S9 V9, COMP-3 packed decimal, COMP binary, zoned sign overpunch, OCCURS, FILLER, sequence columns", "EBCDIC (code page 037) to Unicode, full 256-byte table", "CSV cleanup: delimiter sniffing, RFC 4180 quotes, BOM, header names, US/EU dates, US/EU/accounting money, null markers, duplicate rows, per-row issue list", "Reconciliation in integer cents: matches, amount breaks with tolerance, orphans both sides, duplicate keys, control totals", "Labelled field extraction from OCR / PDF text with source line for each value and a missing-required list"], "gaps": ["No OCR engine or PDF parser here: feed it text from Tesseract, AWS Textract or pdftotext", "No live mainframe connector (DB2 / IMS / VSAM over the network); it decodes the exported files", "No Airflow or dbt project: each op is a pure step you can call from an Airflow task or a dbt Python model", "Other EBCDIC code pages (e.g. 500, 1047) and COMP-1/COMP-2 floats"], "ops": [{"op": "decode_mainframe", "label": "Mainframe records", "help": "Three 32-byte EBCDIC records from a VSAM export, decoded with the COBOL copybook. Balances are COMP-3 packed decimals (one is negative).", "input": {"copybook": "      * CUSTOMER MASTER - VSAM KSDS EXPORT\n       01  CUST-MASTER.\n           05  CUST-ID          PIC 9(6).\n           05  CUST-NAME        PIC X(15).\n           05  BALANCE          PIC S9(7)V99 COMP-3.\n           05  ORDERS-YTD       PIC S9(4) COMP.\n           05  STATUS-CODE      PIC X(4).", "hex": "F0F1F0F0F4F2C1C3D4C540C6D6D6C4E24040404040001234567C000CC1C3E3E5 F0F1F0F0F4F3C2D3E4C540D9C9E5C5D940C3D64040000004520D0003C8D6D3C4 F0F1F0F0F4F4D67DD5C5C9D3405040E2D6D5E24040000000000C0000C3D3E2C4"}}, {"op": "normalize_csv", "label": "Messy CSV", "help": "Semicolon delimiter, BOM, quoted delimiter, EU amounts, mixed date formats, a duplicate row and two bad values. Bad values stay as text and land in the issue list.", "input": {"csv": "\ufeffInvoice #;Customer  Name;Inv Date;Amount\n\"INV-001\";Acme Foods;03/04/2024;\"1.250,00 EUR\"\nINV-002; Blue River Co ;Jan 5, 2024;(310,00)\nINV-002; Blue River Co ;Jan 5, 2024;(310,00)\nINV-003;\"O'Neil; Sons\";N/A;\"2.000,5\"\nINV-004;Delta;31/13/2024;TBD\n", "day_first": true, "date_columns": ["inv_date"], "money_columns": ["amount"]}}, {"op": "reconcile", "label": "Reconcile ledgers", "help": "Mainframe ledger vs. new ERP. One rounding difference inside the 1-cent tolerance, one real break, one orphan each side.", "input": {"key": "invoice", "amount": "total", "tolerance_cents": 1, "left": [{"invoice": "INV-001", "total": "1250.00"}, {"invoice": "INV-002", "total": "-310.00"}, {"invoice": "INV-003", "total": "2000.50"}, {"invoice": "INV-005", "total": "99.99"}], "right": [{"invoice": "INV-001", "total": "1250.01"}, {"invoice": "INV-002", "total": "-301.00"}, {"invoice": "INV-003", "total": 2000.5}, {"invoice": "INV-006", "total": "15.00"}]}}, {"op": "extract_fields", "label": "Fields from PDF text", "help": "Text from an OCR pass over a scanned invoice. Each value has its source line. The PO number is required but absent, so it is reported, not guessed.", "input": {"day_first": true, "text": "NORDIC PARTS GmbH\nRechnung / Invoice\nInvoice No.: NP-2024-00917\nDate of issue\n   14.03.2024\nCustomer: Acme Foods Inc.\nNet amount      EUR 1.050,42\nVAT 19%         EUR   199,58\nTotal due       EUR 1.250,00\nPayment terms: 30 days net", "fields": [{"name": "invoice_no", "labels": ["invoice no", "invoice #", "rechnung nr"], "required": true}, {"name": "issued", "labels": ["date of issue", "invoice date"], "type": "date", "required": true}, {"name": "customer", "labels": ["customer", "bill to"]}, {"name": "total", "labels": ["total due", "amount due", "gesamt"], "type": "money", "required": true}, {"name": "po_number", "labels": ["po number", "purchase order"], "required": true}]}}]}</script>
+<script src="app.js"></script>
+</body>
+</html>
