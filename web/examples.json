@@ -9,13 +9,15 @@
     "EBCDIC (code page 037) to Unicode, full 256-byte table",
     "CSV cleanup: delimiter sniffing, RFC 4180 quotes, BOM, header names, US/EU dates, US/EU/accounting money, null markers, duplicate rows, per-row issue list",
     "Reconciliation in integer cents: matches, amount breaks with tolerance, orphans both sides, duplicate keys, control totals",
-    "Labelled field extraction from OCR / PDF text with source line for each value and a missing-required list"
+    "Labelled field extraction from OCR / PDF text with source line for each value and a missing-required list",
+    "Vector-store chunker: strips OCR page headers, footers and page numbers, joins hyphen breaks, splits at paragraph / sentence / word, overlap, SHA-256 dedupe, JSONL with source and page metadata"
   ],
   "gaps": [
     "No OCR engine or PDF parser here: feed it text from Tesseract, AWS Textract or pdftotext",
     "No live mainframe connector (DB2 / IMS / VSAM over the network); it decodes the exported files",
     "No Airflow or dbt project: each op is a pure step you can call from an Airflow task or a dbt Python model",
-    "Other EBCDIC code pages (e.g. 500, 1047) and COMP-1/COMP-2 floats"
+    "Other EBCDIC code pages (e.g. 500, 1047) and COMP-1/COMP-2 floats",
+    "No embedding call or vector DB write: the JSONL output is what you send to your embedder and store"
   ],
   "ops": [
     {
@@ -141,6 +143,53 @@
           }
         ]
       }
+    },
+    {
+      "op": "chunk_for_vectors",
+      "label": "Chunk for vector store",
+      "help": "Scanned loan file (OCR text, 3 pages) plus decoded mainframe records become clean chunks: headers, footers and page numbers removed, hyphen breaks joined, one JSONL line per chunk with source and page metadata.",
+      "input": {
+        "max_chars": 300,
+        "overlap_chars": 40,
+        "documents": [
+          {
+            "id": "loan-88-1042",
+            "source": "scans/2014/loan-88-1042.pdf",
+            "text": "FIRST NATIONAL LOAN SERVICING - SCANNED 2014\nLoan No. 88-1042  Borrower: Acme Foods Inc.\nThe borrower agrees to repay the principal of USD 250,000 in 120 monthly pay-\nments at a fixed rate of 6.25%.\n\nCollateral: warehouse at 14 Dock St.\nPage 1 of 3\fFIRST NATIONAL LOAN SERVICING - SCANNED 2014\nLate payments incur a fee of 5% of the in-\nstallment. Prepayment is allowed after 24 months without penalty.\nPage 2 of 3\fFIRST NATIONAL LOAN SERVICING - SCANNED 2014\nSigned in Chicago, 3 March 2014.\nPage 3 of 3"
+          },
+          {
+            "id": "cust-master",
+            "source": "vsam/CUST.MASTER",
+            "records": [
+              {
+                "balance": "12345.67",
+                "cust_id": "10042",
+                "cust_name": "ACME FOODS",
+                "orders_ytd": "12",
+                "status_code": "ACTV"
+              },
+              {
+                "balance": "-45.20",
+                "cust_id": "10043",
+                "cust_name": "BLUE RIVER CO",
+                "orders_ytd": "3",
+                "status_code": "HOLD"
+              },
+              {
+                "balance": "0.00",
+                "cust_id": "10044",
+                "cust_name": "O'NEIL & SONS",
+                "orders_ytd": "0",
+                "status_code": "CLSD"
+              }
+            ]
+          }
+        ]
+      }
     }
-  ]
+  ],
+  "project": {
+    "n": 3,
+    "title": "Unstructured Legacy Ingestor"
+  }
 }

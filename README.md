@@ -4,6 +4,8 @@
 
 Turn mainframe records, messy CSV exports and document text into clean, typed, reconciled data, and flag every value it could not trust.
 
+**Also built as Project 3 of 12, "Unstructured Legacy Ingestor",** from the companion [12 FDE projects post](https://x.com/suraj_sharma14/status/2125197762752806998).
+
 **Live demo:** https://fde-03-legacy-etl.braylo777.workers.dev — the Rust core runs in your browser as WebAssembly. No server, no tracking.
 
 ## Why this matters
@@ -17,6 +19,7 @@ Most enterprise AI projects stall on data, not models. The customer's truth live
 - CSV cleanup: delimiter sniffing, RFC 4180 quotes, BOM, header names, US/EU dates, US/EU/accounting money, null markers, duplicate rows, per-row issue list
 - Reconciliation in integer cents: matches, amount breaks with tolerance, orphans both sides, duplicate keys, control totals
 - Labelled field extraction from OCR / PDF text with source line for each value and a missing-required list
+- Vector-store chunker: strips OCR page headers, footers and page numbers, joins hyphen breaks, splits at paragraph / sentence / word, overlap, SHA-256 dedupe, JSONL with source and page metadata
 
 ## What it does not do (yet)
 
@@ -24,6 +27,7 @@ Most enterprise AI projects stall on data, not models. The customer's truth live
 - No live mainframe connector (DB2 / IMS / VSAM over the network); it decodes the exported files
 - No Airflow or dbt project: each op is a pure step you can call from an Airflow task or a dbt Python model
 - Other EBCDIC code pages (e.g. 500, 1047) and COMP-1/COMP-2 floats
+- No embedding call or vector DB write: the JSONL output is what you send to your embedder and store
 
 ## Operations
 
@@ -35,6 +39,7 @@ Every operation takes JSON in and gives JSON out. The CLI, the tests and the dem
 | `normalize_csv` | Semicolon delimiter, BOM, quoted delimiter, EU amounts, mixed date formats, a duplicate row and two bad values. Bad values stay as text and land in the issue list. |
 | `reconcile` | Mainframe ledger vs. new ERP. One rounding difference inside the 1-cent tolerance, one real break, one orphan each side. |
 | `extract_fields` | Text from an OCR pass over a scanned invoice. Each value has its source line. The PO number is required but absent, so it is reported, not guessed. |
+| `chunk_for_vectors` | Scanned loan file (OCR text, 3 pages) plus decoded mainframe records become clean chunks: headers, footers and page numbers removed, hyphen breaks joined, one JSONL line per chunk with source and page metadata. |
 
 ## Run it
 
@@ -81,7 +86,7 @@ web/              demo page; examples.json drives both the page and this README
 
 ## Part of a series
 
-This is one of 12 repos that work through a public Forward Deployed Engineering roadmap ([source post](https://x.com/suraj_sharma14/status/2124827808535048566)). All 12: [github.com/braylo777?q=fde-](https://github.com/braylo777?tab=repositories&q=fde-).
+This is one of 12 repos that work through a public Forward Deployed Engineering roadmap ([12 stages](https://x.com/suraj_sharma14/status/2124827808535048566), [12 projects](https://x.com/suraj_sharma14/status/2125197762752806998)). All 12: [github.com/braylo777?q=fde-](https://github.com/braylo777?tab=repositories&q=fde-).
 
 ## License
 

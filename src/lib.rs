@@ -6,8 +6,10 @@
 //!   names, dates, money formats (US / EU / accounting negatives), null markers, duplicates.
 //! * `reconcile` — match two datasets on a key and report matches, amount breaks and orphans.
 //! * `extract` — pull labelled fields (invoice no, dates, totals) out of OCR / PDF text.
+//! * `chunk` — clean OCR pages and decoded records into vector-store chunks with metadata.
 
 mod api;
+pub mod chunk;
 pub mod copybook;
 pub mod cp037;
 pub mod csvclean;
@@ -17,7 +19,7 @@ pub mod reconcile;
 pub use api::dispatch;
 use serde_json::Value;
 
-pub const OPS: &[&str] = &["decode_mainframe", "normalize_csv", "reconcile", "extract_fields"];
+pub const OPS: &[&str] = &["decode_mainframe", "normalize_csv", "reconcile", "extract_fields", "chunk_for_vectors"];
 
 pub(crate) fn field<'a>(v: &'a Value, k: &str) -> Result<&'a Value, String> {
     v.get(k).ok_or_else(|| format!("missing field `{k}`"))
@@ -32,6 +34,7 @@ pub fn handle(op: &str, input: &Value) -> Result<Value, String> {
         "normalize_csv" => csvclean::normalize_op(input),
         "reconcile" => reconcile::reconcile_op(input),
         "extract_fields" => extract::extract_op(input),
+        "chunk_for_vectors" => chunk::chunk_op(input),
         _ => Err(format!("unknown op `{op}`; known: {}", OPS.join(", "))),
     }
 }
